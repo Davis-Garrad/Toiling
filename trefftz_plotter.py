@@ -8,9 +8,11 @@ params = {
         'xi_0': -0.05 + 0.1j, # centre
         'U': 1,
         'alpha': np.pi/8,
-        'resolution': 512,
+        'resolution': 128,#512,
         'streamline_origins': 41,
         'streamline_length': 2048, # MAX length
+        'plot_options': {
+            },
         }
 
 def cpts(complex_coord):
@@ -91,7 +93,7 @@ def trefftz_plots(params):
     for ii in range(len(origins_rev)):
         streamline = get_streamline(origins_rev[ii], params['streamline_length'], xi_coords, xi_velocity_field, scale=-1e-2)
         streamlines[ii+len(origins)] = streamline
-        print(f'\r{ii} ({ii/(3*params['streamline_origins'])*100:.1f}%)   ', end='')
+        print(f'\r{ii} ({ii/(params['streamline_origins'])*100:.1f}%)   ', end='')
     
     xi_velocities = streamlines[:,1:] - streamlines[:,:-1]
     xi_speeds = np.abs(xi_velocities)#/ (np.max(np.abs(xi_velocities.ravel())) - np.min(np.abs(xi_velocities.ravel())))
@@ -119,7 +121,20 @@ def trefftz_plots(params):
 
     fig.tight_layout()
 
-    fig.show()
+    if('savefile' in params['plot_options'].keys()):
+        fig.savefig(params['plot_options']['savefile'])
+    #plt.ioff()
+    #plt.show()
 
+    return fig
 
-trefftz_plots(params)
+images = []
+index = 0
+for i in np.linspace(-np.pi/4, np.pi/4, 25):
+    print(index)
+    params['alpha'] = i
+    params['plot_options']['savefile'] = f'tmp_truffle/tmp{index}.png'
+    fig=trefftz_plots(params)
+    plt.close(fig)
+    index += 1
+
